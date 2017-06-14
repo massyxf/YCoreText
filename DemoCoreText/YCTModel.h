@@ -23,4 +23,10 @@
 /** font*/
 @property(nonatomic,strong,readonly)UIFont *font;
 
+/** 图片信息*/
+@property(nonatomic,strong)NSMutableArray *imageInfos;
+
+/** 网址链接*/
+@property(nonatomic,strong)NSMutableArray *urlInfos;
+
 @end

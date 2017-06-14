@@ -7,6 +7,10 @@
 //
 
 #import "YCTModel.h"
+#import "YCRegex.h"
+#import "NSString+Emoji.h"
+#import "YCEmojiModel.h"
+#import "YCUrlModel.h"
 
 @interface YCTModel ()
 
@@ -68,6 +72,24 @@
         [attText addAttributes:@{NSFontAttributeName : self.font,
                                  NSForegroundColorAttributeName : [UIColor blackColor]}
                          range:NSMakeRange(0, attText.length)];
+        //emoji
+        NSArray<YCEmojiModel *> *emojiModels = [YCRegex emojiRangesInString:_text];
+        NSDictionary *sizeDic = [self emojiSizeInfo];
+        NSDictionary *attributes = [self normalAttributes];
+        [emojiModels enumerateObjectsWithOptions:NSEnumerationReverse
+                                      usingBlock:^(YCEmojiModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                                          
+                                          // 使用 0xFFFC 作为空白的占位符
+                                          unichar objectReplacementChar = 0xFFFC;
+                                          NSString * content = [NSString stringWithCharacters:&objectReplacementChar length:1];
+                                          NSMutableAttributedString *space =
+                                          [[NSMutableAttributedString alloc] initWithString:content
+                                                                                 attributes:attributes];
+                                          [NSString setEmojiDelegateWithEmojiAtt:space
+                                                                        SizeDict:sizeDic
+                                                                         atRange:NSMakeRange(0, 1)];
+                                          [attText replaceCharactersInRange:obj.range withAttributedString:space];
+                                      }];
         _attText = attText;
     }
     return _attText;
@@ -119,6 +141,46 @@
     return _height;
 }
 
+-(NSMutableArray *)imageInfos{
+    if (!_imageInfos) {
+        _imageInfos = [NSMutableArray array];
+        //emoji
+        __block NSArray<YCEmojiModel *> *emojiModels = [YCRegex emojiRangesInString:_text];
+        NSMutableString *emojiString = [NSMutableString stringWithString:_text];
+        [emojiModels enumerateObjectsUsingBlock:^(YCEmojiModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            YCEmojiLocationModel *locationModel = [[YCEmojiLocationModel alloc] init];
+            locationModel.text = [_text substringWithRange:obj.range];
+            NSRange textRange = [emojiString rangeOfString:locationModel.text];
+            locationModel.location = textRange.location;
+            [_imageInfos addObject:locationModel];
+            [emojiString replaceCharactersInRange:textRange withString:@"x"];
+        }];
+        
+        [self positionEmojis:_imageInfos];
+    }
+    return _imageInfos;
+}
+
+-(NSMutableArray *)urlInfos{
+    if (!_urlInfos) {
+        _urlInfos = [NSMutableArray array];
+        
+        //url
+        NSArray<YCUrlModel *> *urlModels = [YCRegex urlRangesInString:self.attText.string];
+        [urlModels enumerateObjectsUsingBlock:^(YCUrlModel * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            YCUrlLocationModel *model = [[YCUrlLocationModel alloc] init];
+            model.text = obj.text;
+            model.range = obj.range;
+            [_urlInfos addObject:model];
+        }];
+        
+        [self postionUrls:_urlInfos];
+        
+    }
+    return _urlInfos;
+}
+
+
 #pragma mark - custom func
 -(void)releaseCtframe{
     if (!_ctFrame) {
@@ -127,7 +189,144 @@
     }
 }
 
+-(NSDictionary *)emojiSizeInfo{
+    return @{@"width":@(self.font.lineHeight),
+             @"ascent":@(self.font.ascender),
+             @"descent":@(self.font.descender)};
+}
+
+//emoji占位符的属性
+- (NSDictionary *)normalAttributes{
+    NSMutableParagraphStyle *paragraph = [[NSMutableParagraphStyle alloc] init];
+    paragraph.lineBreakMode = NSLineBreakByWordWrapping;
+    return @{NSParagraphStyleAttributeName : paragraph,
+             NSForegroundColorAttributeName : [UIColor clearColor],
+             YCEmoji : @"emoji"};
+}
+
+-(void)positionEmojis:(NSArray *)emojis
+{
+    if (emojis && emojis.count > 0 && self.ctFrame)
+    {
+        CTFrameRef frame = self.ctFrame;
+        NSArray *lines = (NSArray *)CTFrameGetLines(frame);
+        CFIndex lineCount = [lines count];
+        
+        CGFloat maxHeight = self.height;
+        
+        for (int i = 0; i < lineCount; i++)
+        {
+            CTLineRef line = (__bridge CTLineRef)lines[i];
+            CFRange lineRange = CTLineGetStringRange(line);
+            //            DDLogInfo(@"line location:%zd,line length:%zd",lineRange.location,lineRange.length);
+            NSInteger lineMinIndex = lineRange.location;
+            NSInteger lineMaxIndex = lineRange.location + lineRange.length;
+            for (YCEmojiLocationModel *emojiModel in emojis)
+            {
+                if (emojiModel.location >= lineMaxIndex) {
+                    //emoji在下一行
+                    break;
+                } else if(emojiModel.location >= lineMinIndex){
+                    //emoji在这一行
+                    CGRect emojiRect = CGRectZero;
+                    emojiRect.size.width = self.font.lineHeight;
+                    emojiRect.size.height = self.font.ascender - self.font.descender;
+                    CGFloat xOffset = CTLineGetOffsetForStringIndex(line, emojiModel.location, NULL);
+                    //                    DDLogInfo(@"originx:%.2lf,offsetx:%.2lf",lineOrigins[i].x,xOffset);
+                    //在这里使用时并没有设置offsetx，所以可以视为0
+                    CGFloat lineOriginX = 0;
+                    emojiRect.origin.x = lineOriginX + xOffset;
+                    //一般emoji的坐标
+                    emojiRect.origin.y = maxHeight - (i + 1) * self.font.lineHeight;
+                    
+                    CGPathRef pathRef = CTFrameGetPath(frame);
+                    CGRect colRect = CGPathGetBoundingBox(pathRef);
+                    emojiModel.frame = CGRectOffset(emojiRect, colRect.origin.x, colRect.origin.y);
+                    emojiModel.line = i;
+                }
+                //emoji在上一行
+            }
+        }
+    }
+}
 
 
+-(void)postionUrls:(NSArray *)urls{
+    if (urls.count > 0 && self.ctFrame) {
+        CTFrameRef frame = self.ctFrame;
+        NSArray *lines = (NSArray *)CTFrameGetLines(frame);
+        CFIndex lineCount = [lines count];
+                
+        for (int i = 0; i < lineCount; i++)
+        {
+            CTLineRef line = (__bridge CTLineRef)lines[i];
+            CFRange lineRange = CTLineGetStringRange(line);
+            //            DDLogInfo(@"line location:%zd,line length:%zd",lineRange.location,lineRange.length);
+            NSInteger lineMinIndex = lineRange.location;
+            NSInteger lineMaxIndex = lineRange.location + lineRange.length;
+            
+            for (YCUrlLocationModel *urlModel in urls) {
+                NSInteger urlMaxLocation = urlModel.range.location + urlModel.range.length - 1;
+                NSInteger urlMinLocation = urlModel.range.location;
+                if (urlModel.range.location >= lineMaxIndex) {
+                    //在下一行
+                    break;
+                }else if (urlMinLocation >= lineMinIndex && urlMinLocation < lineMaxIndex){
+                    //url在这一行
+                    CGRect emojiRect = CGRectZero;
+                    
+                    //height
+                    emojiRect.size.height = self.font.ascender - self.font.descender;
+                    
+                    CGFloat xOffset = CTLineGetOffsetForStringIndex(line, urlMinLocation, NULL);
+                    
+                    //width
+                    if (urlMaxLocation + 1 >= lineMaxIndex) {
+                        emojiRect.size.width = self.width - xOffset;
+                    }else{
+                        CGFloat xMaxOffset = CTLineGetOffsetForStringIndex(line, urlMaxLocation, NULL);
+                        emojiRect.size.width = xMaxOffset - xOffset;
+                    }
+                    //在这里使用时并没有设置offsetx，所以可以视为0
+                    CGFloat lineOriginX = 0;
+                    emojiRect.origin.x = lineOriginX + xOffset;
+                    //一般emoji的坐标
+                    emojiRect.origin.y = i * self.font.lineHeight;
+                    
+                    CGPathRef pathRef = CTFrameGetPath(frame);
+                    CGRect colRect = CGPathGetBoundingBox(pathRef);
+                    CGRect frame = CGRectOffset(emojiRect, colRect.origin.x, colRect.origin.y);
+                    [urlModel.frames addObject:[NSValue valueWithCGRect:frame]];
+                }
+                
+                if (urlMaxLocation >= lineMinIndex && urlMaxLocation < lineMaxIndex) {
+                    //url在这一行
+                    CGRect emojiRect = CGRectZero;
+                    
+                    //height
+                    emojiRect.size.height = self.font.ascender - self.font.descender;
+                    
+                    CGFloat xOffset = CTLineGetOffsetForStringIndex(line, lineMinIndex, NULL);
+                    
+                    //width
+                    CGFloat xMaxOffset = CTLineGetOffsetForStringIndex(line, urlMaxLocation, NULL);
+                    emojiRect.size.width = xMaxOffset - xOffset;
+                    
+                    //在这里使用时并没有设置offsetx，所以可以视为0
+                    CGFloat lineOriginX = 0;
+                    emojiRect.origin.x = lineOriginX + xOffset;
+                    //一般emoji的坐标
+                    emojiRect.origin.y = i * self.font.lineHeight;
+                    
+                    CGPathRef pathRef = CTFrameGetPath(frame);
+                    CGRect colRect = CGPathGetBoundingBox(pathRef);
+                    CGRect frame = CGRectOffset(emojiRect, colRect.origin.x, colRect.origin.y);
+                    [urlModel.frames addObject:[NSValue valueWithCGRect:frame]];
+                }  
+            }
+        }
+ 
+    }
+}
 
 @end

@@ -8,6 +8,8 @@
 
 #import "YCTView.h"
 #import "YCTModel.h"
+#import "YCEmojiModel.h"
+#import "YCUrlModel.h"
 
 @implementation YCTView
 
@@ -61,12 +63,60 @@
         CFRelease(path);
     }
     
+    //draw image
+    UIImage *image = [UIImage imageNamed:@"1.png"];
+    for (YCEmojiLocationModel *model in self.model.imageInfos) {
+        CGContextDrawImage(context, model.frame, image.CGImage);
+    }
 }
 
 -(void)setModel:(YCTModel *)model{
     _model = model;
     //调用drawRect方法重绘
     [self setNeedsDisplay];
+    
+    
+    
+    //url
+    for (YCUrlLocationModel *model in self.model.urlInfos) {
+        for (NSValue *value in model.frames) {
+            CGRect frame = [value CGRectValue];
+            UIView *view = [[UIView alloc] initWithFrame:frame];
+            view.backgroundColor = [UIColor blueColor];
+            [self addSubview:view];
+        }
+    }
+    
 }
+
+
+#pragma mark - touch
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    UITouch *touch  =[touches anyObject];
+    CGPoint point = [touch locationInView:self];
+    for (YCUrlLocationModel *model in self.model.urlInfos) {
+        for (NSValue *value in model.frames) {
+            CGRect frame = [value CGRectValue];
+            NSLog(@"frame:%@",NSStringFromCGRect(frame));
+            if (CGRectContainsPoint(frame, point)) {
+//                NSLog(@"%@,%@",model.text,NSStringFromRange(model.range));
+                return;
+            }
+        }
+    }
+}
+
+-(void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+
+}
+
+-(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+
+}
+
+-(void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+
+}
+
 
 @end

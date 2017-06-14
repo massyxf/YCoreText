@@ -19,8 +19,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor redColor];
-    
-    YCTModel *model = [YCTModel initWithText:@"汗牛充栋→栋梁之才→才轻德薄→薄暮冥冥→冥顽不灵→灵心慧齿→齿牙余论→论千论万→万里长城" containerWith:200];
+    NSString *text = [NSString stringWithFormat:@"汗牛充栋→%@栋梁之才→%@才轻德薄→%@薄暮冥冥→%@冥顽不灵→%@灵心%@慧齿→齿牙%@余论→论千%@论万→%@万里长城",YCEmoji,YCEmoji,YCEmoji,YCUrl,YCEmoji,YCEmoji,YCEmoji,YCUrl,YCEmoji];
+    YCTModel *model = [YCTModel initWithText:text containerWith:200];
     
     YCTView *view = [[YCTView alloc] initWithFrame:CGRectMake(20, 50, 200, model.height)];
     [self.view addSubview:view];

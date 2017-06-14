@@ -17,6 +17,12 @@
 		4243D9241EEE2AAF00B0BD03 /* DemoCoreTextUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4243D9231EEE2AAF00B0BD03 /* DemoCoreTextUITests.m */; };
 		4243D9331EEE2B0E00B0BD03 /* YCTModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4243D9321EEE2B0E00B0BD03 /* YCTModel.m */; };
 		4243D9361EEE320300B0BD03 /* YCTView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4243D9351EEE320300B0BD03 /* YCTView.m */; };
+		424652C21EF1085F00DD7E62 /* 1.png in Resources */ = {isa = PBXBuildFile; fileRef = 424652C11EF1085F00DD7E62 /* 1.png */; };
+		424652C51EF1103900DD7E62 /* YCRegex.m in Sources */ = {isa = PBXBuildFile; fileRef = 424652C41EF1103900DD7E62 /* YCRegex.m */; };
+		424652C81EF110AA00DD7E62 /* YCEmojiModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 424652C71EF110AA00DD7E62 /* YCEmojiModel.m */; };
+		424652CB1EF110B700DD7E62 /* YCUrlModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 424652CA1EF110B700DD7E62 /* YCUrlModel.m */; };
+		424652CE1EF1147E00DD7E62 /* NSString+Emoji.m in Sources */ = {isa = PBXBuildFile; fileRef = 424652CD1EF1147E00DD7E62 /* NSString+Emoji.m */; };
+		424652D01EF1453200DD7E62 /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = 424652CF1EF1453200DD7E62 /* 2.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +63,17 @@
 		4243D9321EEE2B0E00B0BD03 /* YCTModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YCTModel.m; sourceTree = "<group>"; };
 		4243D9341EEE320300B0BD03 /* YCTView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCTView.h; sourceTree = "<group>"; };
 		4243D9351EEE320300B0BD03 /* YCTView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YCTView.m; sourceTree = "<group>"; };
+		424652C01EF0E99A00DD7E62 /* YCPch.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YCPch.pch; sourceTree = "<group>"; };
+		424652C11EF1085F00DD7E62 /* 1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 1.png; sourceTree = "<group>"; };
+		424652C31EF1103900DD7E62 /* YCRegex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCRegex.h; sourceTree = "<group>"; };
+		424652C41EF1103900DD7E62 /* YCRegex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YCRegex.m; sourceTree = "<group>"; };
+		424652C61EF110AA00DD7E62 /* YCEmojiModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCEmojiModel.h; sourceTree = "<group>"; };
+		424652C71EF110AA00DD7E62 /* YCEmojiModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YCEmojiModel.m; sourceTree = "<group>"; };
+		424652C91EF110B700DD7E62 /* YCUrlModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YCUrlModel.h; sourceTree = "<group>"; };
+		424652CA1EF110B700DD7E62 /* YCUrlModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YCUrlModel.m; sourceTree = "<group>"; };
+		424652CC1EF1147E00DD7E62 /* NSString+Emoji.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Emoji.h"; sourceTree = "<group>"; };
+		424652CD1EF1147E00DD7E62 /* NSString+Emoji.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Emoji.m"; sourceTree = "<group>"; };
+		424652CF1EF1453200DD7E62 /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 2.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,14 +124,24 @@
 		4243D8FD1EEE2AAD00B0BD03 /* DemoCoreText */ = {
 			isa = PBXGroup;
 			children = (
+				424652CF1EF1453200DD7E62 /* 2.png */,
+				424652C11EF1085F00DD7E62 /* 1.png */,
 				4243D9011EEE2AAD00B0BD03 /* AppDelegate.h */,
 				4243D9021EEE2AAD00B0BD03 /* AppDelegate.m */,
 				4243D9041EEE2AAD00B0BD03 /* ViewController.h */,
 				4243D9051EEE2AAD00B0BD03 /* ViewController.m */,
-				4243D9311EEE2B0E00B0BD03 /* YCTModel.h */,
-				4243D9321EEE2B0E00B0BD03 /* YCTModel.m */,
 				4243D9341EEE320300B0BD03 /* YCTView.h */,
 				4243D9351EEE320300B0BD03 /* YCTView.m */,
+				4243D9311EEE2B0E00B0BD03 /* YCTModel.h */,
+				4243D9321EEE2B0E00B0BD03 /* YCTModel.m */,
+				424652C61EF110AA00DD7E62 /* YCEmojiModel.h */,
+				424652C71EF110AA00DD7E62 /* YCEmojiModel.m */,
+				424652C91EF110B700DD7E62 /* YCUrlModel.h */,
+				424652CA1EF110B700DD7E62 /* YCUrlModel.m */,
+				424652C31EF1103900DD7E62 /* YCRegex.h */,
+				424652C41EF1103900DD7E62 /* YCRegex.m */,
+				424652CC1EF1147E00DD7E62 /* NSString+Emoji.h */,
+				424652CD1EF1147E00DD7E62 /* NSString+Emoji.m */,
 				4243D9071EEE2AAE00B0BD03 /* Main.storyboard */,
 				4243D90A1EEE2AAE00B0BD03 /* Assets.xcassets */,
 				4243D90C1EEE2AAE00B0BD03 /* LaunchScreen.storyboard */,
@@ -128,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				4243D8FF1EEE2AAD00B0BD03 /* main.m */,
+				424652C01EF0E99A00DD7E62 /* YCPch.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -258,6 +286,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4243D90E1EEE2AAE00B0BD03 /* LaunchScreen.storyboard in Resources */,
+				424652C21EF1085F00DD7E62 /* 1.png in Resources */,
+				424652D01EF1453200DD7E62 /* 2.png in Resources */,
 				4243D90B1EEE2AAE00B0BD03 /* Assets.xcassets in Resources */,
 				4243D9091EEE2AAE00B0BD03 /* Main.storyboard in Resources */,
 			);
@@ -284,11 +314,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				424652CE1EF1147E00DD7E62 /* NSString+Emoji.m in Sources */,
 				4243D9061EEE2AAD00B0BD03 /* ViewController.m in Sources */,
+				424652C81EF110AA00DD7E62 /* YCEmojiModel.m in Sources */,
 				4243D9361EEE320300B0BD03 /* YCTView.m in Sources */,
 				4243D9031EEE2AAD00B0BD03 /* AppDelegate.m in Sources */,
 				4243D9331EEE2B0E00B0BD03 /* YCTModel.m in Sources */,
 				4243D9001EEE2AAD00B0BD03 /* main.m in Sources */,
+				424652C51EF1103900DD7E62 /* YCRegex.m in Sources */,
+				424652CB1EF110B700DD7E62 /* YCUrlModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,6 +472,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FLV4GVU8JK;
+				GCC_PREFIX_HEADER = $SRCROOT/DemoCoreText/YCPch.pch;
 				INFOPLIST_FILE = DemoCoreText/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -451,6 +486,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FLV4GVU8JK;
+				GCC_PREFIX_HEADER = $SRCROOT/DemoCoreText/YCPch.pch;
 				INFOPLIST_FILE = DemoCoreText/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -524,6 +560,7 @@
 				4243D92A1EEE2AAF00B0BD03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4243D92B1EEE2AAF00B0BD03 /* Build configuration list for PBXNativeTarget "DemoCoreTextTests" */ = {
 			isa = XCConfigurationList;
@@ -532,6 +569,7 @@
 				4243D92D1EEE2AAF00B0BD03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4243D92E1EEE2AAF00B0BD03 /* Build configuration list for PBXNativeTarget "DemoCoreTextUITests" */ = {
 			isa = XCConfigurationList;
@@ -540,6 +578,7 @@
 				4243D9301EEE2AAF00B0BD03 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
