@@ -69,8 +69,11 @@
 -(NSAttributedString *)attText{
     if (!_attText) {
         NSMutableAttributedString *attText = [[NSMutableAttributedString alloc] initWithString:_text];
+        NSMutableParagraphStyle *paragraph = [[NSMutableParagraphStyle alloc] init];
+        paragraph.lineBreakMode = NSLineBreakByCharWrapping;
         [attText addAttributes:@{NSFontAttributeName : self.font,
-                                 NSForegroundColorAttributeName : [UIColor blackColor]}
+                                 NSForegroundColorAttributeName : [UIColor blackColor],
+                                 NSParagraphStyleAttributeName : paragraph}
                          range:NSMakeRange(0, attText.length)];
         //emoji
         NSArray<YCEmojiModel *> *emojiModels = [YCRegex emojiRangesInString:_text];
@@ -218,7 +221,6 @@
         {
             CTLineRef line = (__bridge CTLineRef)lines[i];
             CFRange lineRange = CTLineGetStringRange(line);
-            //            DDLogInfo(@"line location:%zd,line length:%zd",lineRange.location,lineRange.length);
             NSInteger lineMinIndex = lineRange.location;
             NSInteger lineMaxIndex = lineRange.location + lineRange.length;
             for (YCEmojiLocationModel *emojiModel in emojis)
@@ -232,7 +234,7 @@
                     emojiRect.size.width = self.font.lineHeight;
                     emojiRect.size.height = self.font.ascender - self.font.descender;
                     CGFloat xOffset = CTLineGetOffsetForStringIndex(line, emojiModel.location, NULL);
-                    //                    DDLogInfo(@"originx:%.2lf,offsetx:%.2lf",lineOrigins[i].x,xOffset);
+
                     //在这里使用时并没有设置offsetx，所以可以视为0
                     CGFloat lineOriginX = 0;
                     emojiRect.origin.x = lineOriginX + xOffset;
@@ -251,82 +253,95 @@
 }
 
 
--(void)postionUrls:(NSArray *)urls{
-    if (urls.count > 0 && self.ctFrame) {
+-(void)postionUrls:(NSArray *)urls
+{
+    if (urls.count > 0 && self.ctFrame)
+    {
         CTFrameRef frame = self.ctFrame;
         NSArray *lines = (NSArray *)CTFrameGetLines(frame);
         CFIndex lineCount = [lines count];
-                
+        
         for (int i = 0; i < lineCount; i++)
         {
             CTLineRef line = (__bridge CTLineRef)lines[i];
             CFRange lineRange = CTLineGetStringRange(line);
-            //            DDLogInfo(@"line location:%zd,line length:%zd",lineRange.location,lineRange.length);
             NSInteger lineMinIndex = lineRange.location;
             NSInteger lineMaxIndex = lineRange.location + lineRange.length;
             
-            for (YCUrlLocationModel *urlModel in urls) {
-                NSInteger urlMaxLocation = urlModel.range.location + urlModel.range.length - 1;
+            for (YCUrlLocationModel *urlModel in urls)
+            {
+                NSInteger urlMaxLocation = urlModel.range.location + urlModel.range.length;
                 NSInteger urlMinLocation = urlModel.range.location;
-                if (urlModel.range.location >= lineMaxIndex) {
+                if (urlMinLocation >= lineMaxIndex)
+                {
                     //在下一行
                     break;
                 }else if (urlMinLocation >= lineMinIndex && urlMinLocation < lineMaxIndex){
                     //url在这一行
-                    CGRect emojiRect = CGRectZero;
                     
-                    //height
-                    emojiRect.size.height = self.font.ascender - self.font.descender;
-                    
+                    //x offset
                     CGFloat xOffset = CTLineGetOffsetForStringIndex(line, urlMinLocation, NULL);
                     
                     //width
-                    if (urlMaxLocation + 1 >= lineMaxIndex) {
-                        emojiRect.size.width = self.width - xOffset;
+                    CGFloat urlWidth = 0;
+                    if (urlMaxLocation >= lineMaxIndex) {
+                        urlWidth = self.width - xOffset;
                     }else{
                         CGFloat xMaxOffset = CTLineGetOffsetForStringIndex(line, urlMaxLocation, NULL);
-                        emojiRect.size.width = xMaxOffset - xOffset;
+                        urlWidth = xMaxOffset - xOffset;
                     }
-                    //在这里使用时并没有设置offsetx，所以可以视为0
-                    CGFloat lineOriginX = 0;
-                    emojiRect.origin.x = lineOriginX + xOffset;
-                    //一般emoji的坐标
-                    emojiRect.origin.y = i * self.font.lineHeight;
                     
-                    CGPathRef pathRef = CTFrameGetPath(frame);
-                    CGRect colRect = CGPathGetBoundingBox(pathRef);
-                    CGRect frame = CGRectOffset(emojiRect, colRect.origin.x, colRect.origin.y);
-                    [urlModel.frames addObject:[NSValue valueWithCGRect:frame]];
+                    CGRect urlFrame = [self frameWithCtframe:frame line:i offsetX:xOffset width:urlWidth];
+                    [urlModel.frames addObject:[NSValue valueWithCGRect:urlFrame]];
                 }
                 
-                if (urlMaxLocation >= lineMinIndex && urlMaxLocation < lineMaxIndex) {
-                    //url在这一行
-                    CGRect emojiRect = CGRectZero;
-                    
-                    //height
-                    emojiRect.size.height = self.font.ascender - self.font.descender;
-                    
-                    CGFloat xOffset = CTLineGetOffsetForStringIndex(line, lineMinIndex, NULL);
-                    
-                    //width
-                    CGFloat xMaxOffset = CTLineGetOffsetForStringIndex(line, urlMaxLocation, NULL);
-                    emojiRect.size.width = xMaxOffset - xOffset;
-                    
-                    //在这里使用时并没有设置offsetx，所以可以视为0
-                    CGFloat lineOriginX = 0;
-                    emojiRect.origin.x = lineOriginX + xOffset;
-                    //一般emoji的坐标
-                    emojiRect.origin.y = i * self.font.lineHeight;
-                    
-                    CGPathRef pathRef = CTFrameGetPath(frame);
-                    CGRect colRect = CGPathGetBoundingBox(pathRef);
-                    CGRect frame = CGRectOffset(emojiRect, colRect.origin.x, colRect.origin.y);
-                    [urlModel.frames addObject:[NSValue valueWithCGRect:frame]];
-                }  
+                if (urlMaxLocation - 1 >= lineMinIndex && urlMaxLocation <= lineMaxIndex)
+                {
+                    if (urlMinLocation < lineMinIndex)
+                    {
+                        //url在这一行
+                        
+                        //x offset
+                        CGFloat xOffset = CTLineGetOffsetForStringIndex(line, lineMinIndex, NULL);
+                        
+                        //width
+                        CGFloat xMaxOffset = CTLineGetOffsetForStringIndex(line, urlMaxLocation, NULL);
+                        CGFloat urlWidth = xMaxOffset - xOffset;
+                        
+                        CGRect urlFrame = [self frameWithCtframe:frame line:i offsetX:xOffset width:urlWidth];
+                        [urlModel.frames addObject:[NSValue valueWithCGRect:urlFrame]];
+                    }
+                }
+                
             }
         }
- 
     }
 }
+
+-(CGRect)frameWithCtframe:(CTFrameRef)frame
+                     line:(NSInteger)lineIndex
+                  offsetX:(CGFloat)offsetX
+                    width:(CGFloat)width{
+    //url在这一行
+    CGRect rect = CGRectZero;
+    
+    //height
+    rect.size.height = self.font.ascender - self.font.descender;
+    
+    //width
+    rect.size.width = width;
+    
+    //在这里使用时并没有设置origin offsetx，所以可以视为0
+    CGFloat lineOriginX = 0;
+    rect.origin.x = lineOriginX + offsetX;
+    
+    //一般emoji的坐标
+    rect.origin.y = lineIndex * self.font.lineHeight;
+    
+    CGPathRef pathRef = CTFrameGetPath(frame);
+    CGRect colRect = CGPathGetBoundingBox(pathRef);
+    return CGRectOffset(rect, colRect.origin.x, colRect.origin.y);
+}
+
 
 @end

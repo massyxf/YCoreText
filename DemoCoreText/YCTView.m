@@ -11,6 +11,16 @@
 #import "YCEmojiModel.h"
 #import "YCUrlModel.h"
 
+@interface YCTView ()
+
+/** touch url*/
+@property(nonatomic,strong)YCUrlLocationModel *urlModel;
+
+/** shadow view*/
+@property(nonatomic,strong)NSMutableArray<UIView *> *shawdowViews;
+
+@end
+
 @implementation YCTView
 
 -(void)drawRect:(CGRect)rect{
@@ -74,48 +84,68 @@
     _model = model;
     //调用drawRect方法重绘
     [self setNeedsDisplay];
-    
-    
-    
-    //url
-    for (YCUrlLocationModel *model in self.model.urlInfos) {
-        for (NSValue *value in model.frames) {
-            CGRect frame = [value CGRectValue];
-            UIView *view = [[UIView alloc] initWithFrame:frame];
-            view.backgroundColor = [UIColor blueColor];
-            [self addSubview:view];
-        }
-    }
-    
 }
 
+-(NSMutableArray<UIView *> *)shawdowViews{
+    if (!_shawdowViews) {
+        _shawdowViews = [NSMutableArray array];
+    }
+    return _shawdowViews;
+}
+
+#pragma mark - custom func
+-(void)removeShadowView{
+    for (UIView *view in self.shawdowViews) {
+        [view removeFromSuperview];
+    }
+    [self.shawdowViews removeAllObjects];
+}
 
 #pragma mark - touch
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
+    self.urlModel = nil;
+    [self removeShadowView];
     UITouch *touch  =[touches anyObject];
     CGPoint point = [touch locationInView:self];
     for (YCUrlLocationModel *model in self.model.urlInfos) {
         for (NSValue *value in model.frames) {
             CGRect frame = [value CGRectValue];
-            NSLog(@"frame:%@",NSStringFromCGRect(frame));
             if (CGRectContainsPoint(frame, point)) {
-//                NSLog(@"%@,%@",model.text,NSStringFromRange(model.range));
-                return;
+                //包含触摸点
+                self.urlModel = model;
+                break;
             }
+        }
+        if (self.urlModel) {
+            for (NSValue *value in self.urlModel.frames) {
+                CGRect frame = [value CGRectValue];
+                UIView *shawdowView = [[UIView alloc] initWithFrame:frame];
+                shawdowView.backgroundColor = [UIColor colorWithRed:0.3 green:0.2 blue:0.4 alpha:0.3];
+                [self addSubview:shawdowView];
+                [self.shawdowViews addObject:shawdowView];
+            }
+            return;
         }
     }
 }
 
 -(void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-
+    self.urlModel = nil;
+    [self removeShadowView];
 }
 
 -(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-
+    if (self.urlModel) {
+        NSLog(@"touch:%@",self.urlModel.text);
+        NSString *url = [NSString stringWithFormat:@"http://%@",self.urlModel.text];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
+        [self removeShadowView];
+    }
 }
 
 -(void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event{
-
+    self.urlModel = nil;
+    [self removeShadowView];
 }
 
 
